@@ -15,7 +15,7 @@ A random personalized inspirational quotes generator. Written in JavaScript for 
 2. Clone the repository to your machine:
 
    ```bash
-   git clone
+   git clone https://github.com/garze05/Randquote.git
    ```
 
 3. `cd` to the folder and run with:
