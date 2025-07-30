@@ -29,11 +29,11 @@ async function main() {
 		categories: [], // This would be populated with the selected quote categories of the user
 	};
 
-	// Which arguments are available to start the customization process:
+	// Arguments available to start the customization process:
 	const startArgvs = ["start", "s"];
-	// We save what the user has written after node randquote
+	// Store the argument provided by the user after 'node randquote'
 	const argv2 = process.argv[2];
-	// isStart is determined if the argument passed to our program is some of the variants of the array
+	// 'isInitialConfig' is true if the argument passed to our program is one of the start variants.
 	const isInitialConfig = startArgvs.includes(argv2) ? true : false;
 
 	/* User preferences config loading and saving */
@@ -60,7 +60,7 @@ async function main() {
 		}
 	};
 
-	/* This function fabricates the final quote that is displayed to the user */
+	/* This function constructs the final quote to be displayed to the user */
 	// All parameters are arrays
 	const randomQuote = (welcomesArr, introsArr, quotesArr, finalsArr) => {
 		// First get random element from all of our pieces of text
@@ -68,18 +68,18 @@ async function main() {
 		let intro = randomElement(introsArr);
 		const final = randomElement(finalsArr);
 
-		// For the quote, get from user preferences a random category to grab the quote from
+		// For the quote, get a random category from the user's preferences
 		const categoryId = randomElement(user.categories);
 		const categoryName = categories.find(
 			category => category.id == categoryId
 		).name;
 		const quoteObject = quotesArr.find(category => {
-			return category.id == categoryId; // We use double '==' equals because the array has the numbers as strings.
+			return category.id == categoryId; // We use '==' because the category IDs in the array are strings.
 		});
 
 		// Get the quote
 		const quote = randomElement(quoteObject.quotes);
-		// If intro has something, add a colon :
+		// If the intro text is not empty, add a colon:
 		if (intro) {
 			intro += ":";
 		}
@@ -88,11 +88,12 @@ async function main() {
 		console.log(`\nCategory: ${categoryName}`);
 	};
 
-	/* If user wants to change their preferences or they are executing the program for the first time (they have yet to assign a name) */
+	/* If the user wants to change their preferences or is running the program for the first time (and has not yet assigned a name) */
 	if (isInitialConfig || !fs.existsSync(confFilePath)) {
 		const name = await rl.question(
 			`${randomElement(welcomeStrings)}, please input your name: `
 		);
+
 		// Save the name to the user object
 		user.name = name;
 
@@ -101,28 +102,30 @@ async function main() {
 		console.log("Available categories");
 		let selectedCategories;
 		do {
-			// Print all categories nicely and save user preferences
+			// Print all categories and prompt the user for their preferences
 			categories.forEach(categorie => {
 				console.log(`${categorie.id}. ${categorie.name}`);
 			});
 			selectedCategories = await rl.question(
 				"\nPlease write your preferred quote categories (separated by commas, eg. 1, 2, etc...): "
 			);
-			// Check to see if user input is valid, we check if its only digits from
+
+			// Check if the user input is valid. We check if it only contains digits within the valid range.
 			const validDigits = `[1-${categories.length}]`;
 			const regex = new RegExp(
 				`^\\s*${validDigits}\\s*(\\s*,\\s*${validDigits}\\s*)*\\s*,?\\s*$`
 			);
 			if (selectedCategories.match(regex)) {
-				// Convert the selectedCategories to a array and change user categories to selectedCategories
+				// Convert the selectedCategories string to an array and update the user's categories
 				selectedCategories = selectedCategories
 					.split(",")
 					.map(cat => cat.trim());
+
 				// Save category preferences to user object
 				user.categories = selectedCategories;
 			}
 		} while (!user.categories.length);
-		writeUserInfo(); // Write the user preferences to a json file.
+		writeUserInfo(); // Write the user preferences to a JSON file.
 		rl.close();
 	} else {
 		// Load user data from file
