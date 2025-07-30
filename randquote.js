@@ -1,6 +1,7 @@
-import * as fs from "node:fs/promises"; // To use Nodejs's file system tools
-import * as readline from "node:readline/promises"; // To manage user input to a readable stream
+import fs from "node:fs"; // To use Nodejs's file system tools
+import readline from "readline/promises"; // To manage user input to a readable stream with promises
 import { stdin as input, stdout as output } from "node:process"; // Access to Node process's input and output
+
 // Own helpers
 import { randomElement } from "./helpers.js";
 
@@ -12,98 +13,134 @@ import categoryQuotes from "./quotedata.js";
 
 // Input stream es Readable, Output is Writable. Output to print prompts for user input, and we read from input stream
 // https://nodejs.org/docs/latest-v22.x/api/readline.html#class-interfaceconstructor
-const rl = readline.createInterface({ input, output });
+async function main() {
+	const rl = readline.createInterface({ input, output });
 
-/* User preferences config */
-const confFileName = "userconfig.json";
-// By default we have this categories available:
-const categories = [
-	{ id: 1, name: "Wealth" },
-	{ id: 2, name: "Gym/Sports" },
-	{ id: 3, name: "Tech" },
-	{ id: 4, name: "Love" },
-	{ id: 5, name: "Religious (Christian)" },
-];
-const user = {
-	name: "",
-	categories: [], // This would be populated with the selected quote categories of the user
-};
+	// By default we have this categories available:
+	const categories = [
+		{ id: 1, name: "Wealth" },
+		{ id: 2, name: "Gym/Sports" },
+		{ id: 3, name: "Tech" },
+		{ id: 4, name: "Love" },
+		{ id: 5, name: "Religious (Christian)" },
+	];
+	const user = {
+		name: "",
+		categories: [], // This would be populated with the selected quote categories of the user
+	};
 
-/* Do this when we finish the main features */
-// const loadUserInfo = configFile => {
-// 	// If file does not exist, create it
-// 	// If it exists, load the configuration to the user object.
-// 	// We need to use json for this
-// };
+	// Which arguments are available to start the customization process:
+	const startArgvs = ["start", "s"];
+	// We save what the user has written after node randquote
+	const argv2 = process.argv[2];
+	// isStart is determined if the argument passed to our program is some of the variants of the array
+	const isInitialConfig = startArgvs.includes(argv2) ? true : false;
 
-// Which arguments are available to start the customization process:
-const startArgvs = ["start", "s"];
-// We save what the user has written after node randquote
-const argv2 = process.argv[2];
-// isStart is determined if the argument passed to our program is some of the variants of the array
-const isStart = startArgvs.includes(argv2) ? true : false;
+	/* User preferences config loading and saving */
+	const confFilePath = "./userconfig.json";
 
-/* If user wants to change their preferences or they are executing the program for the first time (they have yet to assign a name) */
-if (user.name.trim() === "" || isStart) {
-	const name = await rl.question(
-		`${randomElement(welcomeStrings)}, please input your name: `
-	);
-	// Save the name to the user object
-	user.name = name;
-
-	console.log(`\nNice to meet you ${name}!`);
-
-	console.log("Available categories");
-	let selectedCategories;
-	do {
-		// Print all categories nicely and save user preferences
-		categories.forEach(categorie => {
-			console.log(`${categorie.id}. ${categorie.name}`);
-		});
-		selectedCategories = await rl.question(
-			"Please write your preferred quote categories (separated by commas, eg. 1, 2, etc...): "
-		);
-		// Check to see if user input is valid, we check if its only digits from
-		const validDigits = `[1-${categories.length}]`;
-		const regex = new RegExp(
-			`^\\s*${validDigits}\\s*(\\s*,\\s*${validDigits}\\s*)*\\s*,?\\s*$`
-		);
-		if (selectedCategories.match(regex)) {
-			// Convert the selectedCategories to a array and change user categories to selectedCategories
-			selectedCategories = selectedCategories.split(",");
-			// Save category preferences to user object
-			user.categories = selectedCategories;
+	const writeUserInfo = () => {
+		try {
+			const confContent = JSON.stringify(user);
+			fs.writeFileSync(confFilePath, confContent);
+			console.log(
+				"\nThank you! Your preferences have been saved. Next time you run Randquote, a random custom quote would be generated for you."
+			);
+		} catch (err) {
+			console.error("Error saving configuration file", err);
 		}
-	} while (!user.categories.length);
-	console.log(
-		"\nThank you! Your preferences have been saved. Next time you run Randquote, a random custom quote would be generated for you."
-	);
-	rl.close();
-} else {
-	randomQuote(welcomeStrings, introStrings, categoryQuotes, finalStrings);
+	};
+
+	const readUserInfo = () => {
+		try {
+			return fs.readFileSync(confFilePath, "utf8");
+		} catch (err) {
+			console.error("Error reading file:", err);
+			return null;
+		}
+	};
+
+	/* This function fabricates the final quote that is displayed to the user */
+	// All parameters are arrays
+	const randomQuote = (welcomesArr, introsArr, quotesArr, finalsArr) => {
+		// First get random element from all of our pieces of text
+		const welcome = randomElement(welcomesArr);
+		let intro = randomElement(introsArr);
+		const final = randomElement(finalsArr);
+
+		// For the quote, get from user preferences a random category to grab the quote from
+		const categoryId = randomElement(user.categories);
+		const categoryName = categories.find(
+			category => category.id == categoryId
+		).name;
+		const quoteObject = quotesArr.find(category => {
+			return category.id == categoryId; // We use double '==' equals because the array has the numbers as strings.
+		});
+
+		// Get the quote
+		const quote = randomElement(quoteObject.quotes);
+		// If intro has something, add a colon :
+		if (intro) {
+			intro += ":";
+		}
+		// Log our final quote message
+		console.log(`${welcome} ${user.name}! ${intro}\n\n"${quote}" ${final}`);
+		console.log(`\nCategory: ${categoryName}`);
+	};
+
+	/* If user wants to change their preferences or they are executing the program for the first time (they have yet to assign a name) */
+	if (isInitialConfig || !fs.existsSync(confFilePath)) {
+		const name = await rl.question(
+			`${randomElement(welcomeStrings)}, please input your name: `
+		);
+		// Save the name to the user object
+		user.name = name;
+
+		console.log(`\nNice to meet you ${name}!`);
+
+		console.log("Available categories");
+		let selectedCategories;
+		do {
+			// Print all categories nicely and save user preferences
+			categories.forEach(categorie => {
+				console.log(`${categorie.id}. ${categorie.name}`);
+			});
+			selectedCategories = await rl.question(
+				"\nPlease write your preferred quote categories (separated by commas, eg. 1, 2, etc...): "
+			);
+			// Check to see if user input is valid, we check if its only digits from
+			const validDigits = `[1-${categories.length}]`;
+			const regex = new RegExp(
+				`^\\s*${validDigits}\\s*(\\s*,\\s*${validDigits}\\s*)*\\s*,?\\s*$`
+			);
+			if (selectedCategories.match(regex)) {
+				// Convert the selectedCategories to a array and change user categories to selectedCategories
+				selectedCategories = selectedCategories
+					.split(",")
+					.map(cat => cat.trim());
+				// Save category preferences to user object
+				user.categories = selectedCategories;
+			}
+		} while (!user.categories.length);
+		writeUserInfo(); // Write the user preferences to a json file.
+		rl.close();
+	} else {
+		// Load user data from file
+		const jsonData = readUserInfo();
+		if (jsonData) {
+			const userFromJSON = JSON.parse(jsonData);
+			user.name = userFromJSON.name;
+			user.categories = userFromJSON.categories;
+
+			// Generate random quote
+			randomQuote(welcomeStrings, introStrings, categoryQuotes, finalStrings);
+		} else {
+			console.log(
+				"Error loading user preferences. Please run with 'start' argument to set up your preferences."
+			);
+		}
+		rl.close();
+	}
 }
 
-/* This function fabricates the final quote that is displayed to the user */
-// All parameters are arrays
-const randomQuote = (welcomesArr, introsArr, quotesArr, finalsArr) => {
-	// First get random element from all of our pieces of text
-	const welcome = randomElement(welcomesArr);
-	const intro = randomElement(introsArr);
-	const final = randomElement(finalsArr);
-
-	// For the quote, get from user preferences a random category to grab the quote from
-	const categoryId = randomElement(user.categories);
-	const categoryName = categories.find(
-		category => category.id == categoryId
-	).name;
-	const quoteObject = quotesArr.find(category => {
-		return category.id == categoryId; // We use double '==' equals because the array has the numbers as strings.
-	});
-
-	// Get the quote
-	const quote = randomElement(quoteObject.quotes);
-
-	// Log our final quote message
-	console.log(`${welcome} ${user.name}!, ${intro}\n"${quote}" ${final}`);
-	console.log(`\nCategory: ${categoryName}`);
-};
+main();
