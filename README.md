@@ -1,35 +1,39 @@
 # Randquote
 
-A random personalized inspirational quotes generator. Written in JavaScript for Node.js
+A random, personalized inspirational quote generator written in JavaScript for Node.js.
 
 ## Features
 
-- Run the program for the first time, you will be asked for your name and interests.
-- Each consecutive run after will output a personalized inspirational quote based on your previous answers.
-- Possibility to change your answers later on.
+- On the first run, you'll be asked for your name and interests.
+- Every run after that will display a personalized inspirational quote based on your previous answers.
+- You can update your answers at any time.
 
-## Installation and usage
+## Installation and Usage
 
-1. Make sure to have a recent version of Node.js installed on your machine.
+1. Make sure you have a recent version of Node.js installed on your machine.
 
-2. Clone the repository to your machine:
+2. Clone the repository to your local machine:
 
    ```bash
    git clone https://github.com/garze05/Randquote.git
    ```
 
-3. `cd` to the folder and run with:
+3. Navigate to the project folder and run:
 
    ```bash
    node randquote
    ```
 
-4. **Extra:** to later change your answers, you can run `randquote` with:
+4. **Optional:** To update your information later, run `randquote` with the `s` or `start` argument:
 
    ```bash
-   node randquote --start
+   node randquote s
+   node randquote start
    ```
+
+   Both commands will have the same effect. You’ll be prompted to re-enter your user information.
 
 ### Note
 
-This project was made during the course of Codecademy's Full-Stack Engineer Career Path. Consult the original course [here](https://www.codecademy.com/career-journey/full-stack-engineer).
+This project was created during Codecademy’s Full-Stack Engineer Career Path for the Mixed Messages Project.
+You can check out the original course [here](https://www.codecademy.com/career-journey/full-stack-engineer).
