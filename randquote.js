@@ -15,7 +15,7 @@ import categoryQuotes from "./quotedata.js";
 const rl = readline.createInterface({ input, output });
 
 /* User preferences config */
-const confFileName = "user-config.json";
+const confFileName = "userconfig.json";
 // By default we have this categories available:
 const categories = [
 	{ id: 1, name: "Wealth" },
@@ -79,8 +79,31 @@ if (user.name.trim() === "" || isStart) {
 		"\nThank you! Your preferences have been saved. Next time you run Randquote, a random custom quote would be generated for you."
 	);
 	rl.close();
+} else {
+	randomQuote(welcomeStrings, introStrings, categoryQuotes, finalStrings);
 }
 
 /* This function fabricates the final quote that is displayed to the user */
 // All parameters are arrays
-const randomQuote = (welcomesArr, introsArr, quotesArr, finalsArr) => {};
+const randomQuote = (welcomesArr, introsArr, quotesArr, finalsArr) => {
+	// First get random element from all of our pieces of text
+	const welcome = randomElement(welcomesArr);
+	const intro = randomElement(introsArr);
+	const final = randomElement(finalsArr);
+
+	// For the quote, get from user preferences a random category to grab the quote from
+	const categoryId = randomElement(user.categories);
+	const categoryName = categories.find(
+		category => category.id == categoryId
+	).name;
+	const quoteObject = quotesArr.find(category => {
+		return category.id == categoryId; // We use double '==' equals because the array has the numbers as strings.
+	});
+
+	// Get the quote
+	const quote = randomElement(quoteObject.quotes);
+
+	// Log our final quote message
+	console.log(`${welcome} ${user.name}!, ${intro}\n"${quote}" ${final}`);
+	console.log(`\nCategory: ${categoryName}`);
+};
