@@ -4,6 +4,12 @@ import { stdin as input, stdout as output } from "node:process"; // Access to No
 // Own helpers
 import { randomElement } from "./helpers.js";
 
+// Pieces of the quote we will use to randomly change our quote.
+import { welcomeStrings, introStrings, finalStrings } from "./quotedata.js";
+
+// Quotes divided by category
+import categoryQuotes from "./quotedata.js";
+
 // Input stream es Readable, Output is Writable. Output to print prompts for user input, and we read from input stream
 // https://nodejs.org/docs/latest-v22.x/api/readline.html#class-interfaceconstructor
 const rl = readline.createInterface({ input, output });
@@ -23,6 +29,7 @@ const user = {
 	categories: [], // This would be populated with the selected quote categories of the user
 };
 
+/* Do this when we finish the main features */
 // const loadUserInfo = configFile => {
 // 	// If file does not exist, create it
 // 	// If it exists, load the configuration to the user object.
@@ -36,26 +43,15 @@ const argv2 = process.argv[2];
 // isStart is determined if the argument passed to our program is some of the variants of the array
 const isStart = startArgvs.includes(argv2) ? true : false;
 
-/* Pieces of data */
-// For all the pieces we would be using to generate a random quote, we should add a
-// ',' to them programatically
-const hiPieces = ["Hi", "Hello", "How's it going?"]; // We would add the user.name with a space when doing our quote
-const introPieces = ["Always remember", "I wish you're having a good day", ""];
-const finalPieces = [
-	"Stay focused!",
-	"Don't forget it!",
-	"C'mon, let's do this",
-];
-
 /* If user wants to change their preferences or they are executing the program for the first time (they have yet to assign a name) */
 if (user.name.trim() === "" || isStart) {
 	const name = await rl.question(
-		`${randomElement(hiPieces)}, please input your name: `
+		`${randomElement(welcomeStrings)}, please input your name: `
 	);
 	// Save the name to the user object
 	user.name = name;
 
-	console.log(`Nice to meet you ${name}.\n`);
+	console.log(`\nNice to meet you ${name}!`);
 
 	console.log("Available categories");
 	let selectedCategories;
@@ -80,12 +76,11 @@ if (user.name.trim() === "" || isStart) {
 		}
 	} while (!user.categories.length);
 	console.log(
-		"Thank you! Your preferences have been saved. Next time you run Randquote, a random customn quote would be generated for you."
+		"\nThank you! Your preferences have been saved. Next time you run Randquote, a random custom quote would be generated for you."
 	);
 	rl.close();
-	console.log(user.name);
-	console.log(user.categories);
 }
 
 /* This function fabricates the final quote that is displayed to the user */
-// const mixedSentence = (hiArr, introArr, quoteArr, finalArr) => {};
+// All parameters are arrays
+const randomQuote = (welcomesArr, introsArr, quotesArr, finalsArr) => {};
