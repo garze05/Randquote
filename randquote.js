@@ -95,9 +95,9 @@ async function main() {
 		);
 
 		// Save the name to the user object
-		user.name = name;
+		user.name = name.trim();
 
-		console.log(`\nNice to meet you ${name}!`);
+		console.log(`\nNice to meet you ${user.name}!`);
 
 		console.log("Available categories");
 		let selectedCategories;
