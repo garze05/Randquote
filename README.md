@@ -1,4 +1,3 @@
-![https://www.gabrielro.com](https://gabrielro.com/_astro/randquote.C454CwRu_Zlt8eK.webp)
 # Randquote
 
 A random, personalized inspirational quote generator written in JavaScript for Node.js.
